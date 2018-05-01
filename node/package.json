@@ -1,0 +1,16 @@
+{
+  "name": "sieve-worker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ansi-align": "^2.0.0",
+    "chalk": "^2.3.2",
+    "charm": "^1.0.2"
+  }
+}
