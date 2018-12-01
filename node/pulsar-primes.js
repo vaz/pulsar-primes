@@ -1,4 +1,4 @@
-const id = x => x   // the identity function is always handy.
+const id = x => x   // identity function is best function
 
 
 // Generates a repeating pattern of `p` (period) ticks, consisting of
