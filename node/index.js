@@ -88,99 +88,105 @@ function* factorize(limit=Infinity) {
   }
 }
 
-function main() {
-  const stringWidth = require('string-width')
-  const left = (width, text) =>
-    '' + text + ' '.repeat(Math.max(0, width - stringWidth(text)))
-  const right = (width, text) =>
-          ' '.repeat(Math.max(0, width - stringWidth(text))) + text
+const def = m => m() // sugar
 
-  const chalk = require('chalk')
-  const gray = x => chalk.gray(x)
-  const white = x => chalk.whiteBright.bold(x)
-  const blue = x => chalk.blueBright(x)
+const align = def((
+  len = require('string-width'),
+  padding = (width, text) => ' '.repeat(Math.max(0, width - len(text))),
+) => ({
+  left: (width, text) => '' + text + padding(width, text),
+  right: (width, text) => padding(width, text) + text,
+}))
 
-  const formatPulses = pulses => {
-    return map(p => right(2, (p ? blue : gray)(p)), take(16, pulses))
-  }
+const colours = def((
+  chalk = require('chalk'),
+) => ({
+  gray: chalk.gray,
+  white: chalk.bold.whiteBright,
+  blue: chalk.blueBright,
+}))
 
-  const format = ({value, prime, factors, pulses}) => {
-    const c0 = prime ? white(value) : gray(value)
-    const c1 = prime ? white(`prime!`) : gray(factors)
-    const c2 = [...formatPulses(pulses)].join(` `)
-    return [
-      left(10, c0),
-      left(20, c1),
-      c2
-    ].join(' ')
-  }
+const format = def((
+  {left, right} = align,
+  {gray, white, blue} = colours,
+  fmtPulse = p => right(2, (p ? blue : gray)(p)),
+) => ({value, prime, factors, pulses}) => (
+  [ left(10, prime ? white(value) : gray(value)),
+    left(20, prime ? white(`prime!`) : gray(factors)),
+    [...map(fmtPulse, take(16, pulses))].join(` `),
+  ].join(` `)
+))
 
-  const charm = require('charm')(process.stdout)
-
-  const view = {
-    top: 5,
-    left: 5,
-    height: 20,
-    width: 60,
-    lines: [],
-    queue: [],
-    changed: true,
-    bg: 'black',
-    init() {
-      charm.reset()
-      charm.position(view.left, this.top)
-      for (let i = 0; i < this.height; i++) {
-        charm.write(' '.repeat(this.width) + "\n")
+const View = (
+  charm = require('charm')(process.stdout),
+) => ({
+  top: 5,
+  left: 5,
+  height: 20,
+  width: 60,
+  lines: [],
+  queue: [],
+  changed: true,
+  bg: 'black',
+  init() {
+    charm.reset()
+    charm.position(this.left, this.top)
+    for (let i = 0; i < this.height; i++) {
+      charm.write(' '.repeat(this.width) + "\n")
+    }
+  },
+  cleanup: () => charm.reset(),
+  tick() {
+    if (this.queue.length > 0) {
+      if (this.lines.length >= this.height) {
+        this.lines.shift()
       }
-    },
-    tick() {
-      if (this.queue.length > 0) {
-        if (this.lines.length >= this.height) {
-          this.lines.shift()
-        }
-        this.lines.push(this.queue.shift())
-        this.render()
-      }
-      if (this.showStats) this.updateStats()
-    },
-    get full() { return this.queue.length >= this.height * 2 },
-    enqueue(text) {
-      if (this.full) return false
-      this.queue.push(text)
-      return true
-    },
-    showStats: true,
-    frame: 0,
-    stats: { primes: 0, latestPrime: -1, },
-    updateStats() {
-      this.frame++
-      if (!this.showStats) return
-      charm.position(0,1)
-      charm.erase('line')
-      charm.write('primes: ' + this.stats.primes + ', latest: ' + this.stats.latestPrime)
-      charm.position(0,2)
-      charm.erase('line')
-      charm.write('lines: ' + this.lines.length)
-      charm.position(0,3)
-      charm.erase('line')
-      charm.write('queue: ' + this.queue.length)
-      charm.position(0,4)
-      charm.erase('line')
-      charm.write('frame: ' + this.frame)
-    },
-    render() {
-      charm.position(this.left, this.top)
-      let i = this.top
-      for (let line of view.lines) {
-        charm.position(view.left, i++)
-        charm.background('black')
-        charm.write('' + line)
-        charm.erase('end')
-        charm.display('reset')
-      }
+      this.lines.push(this.queue.shift())
+      this.render()
+    }
+    if (this.showStats) this.updateStats()
+  },
+  get full() {
+    return this.queue.length >= this.height * 2
+  },
+  enqueue(text) {
+    if (this.full) return false
+    this.queue.push(text)
+    return true
+  },
+  showStats: true,
+  frame: 0,
+  stats: { primes: 0, latestPrime: -1, },
+  updateStats() {
+    this.frame++
+    if (!this.showStats) return
+    charm.position(0,1)
+    charm.erase('line')
+    charm.write('primes: ' + this.stats.primes + ', latest: ' + this.stats.latestPrime)
+    charm.position(0,2)
+    charm.erase('line')
+    charm.write('lines: ' + this.lines.length)
+    charm.position(0,3)
+    charm.erase('line')
+    charm.write('queue: ' + this.queue.length)
+    charm.position(0,4)
+    charm.erase('line')
+    charm.write('frame: ' + this.frame)
+  },
+  render() {
+    charm.position(this.left, this.top)
+    let i = this.top
+    for (let line of this.lines) {
+      charm.position(this.left, i++)
+      charm.background('black')
+      charm.write('' + line)
+      charm.erase('end')
+      charm.display('reset')
     }
   }
+})
 
+function App(view = View()) {
   view.init()
 
   const REFRESH = 24
@@ -191,31 +197,36 @@ function main() {
 
   const limit = parseInt(process.argv) || Infinity
   const facseq = factorize(limit)
-  const formatted = map(f => {
-    f.formatted = format(f)
-    return f
-  }, facseq)
+  const formatted = map(f => { f.formatted = format(f); return f }, facseq)
 
   const work = () => {
-    if (view.full) {
-      return setTimeout(work, 100)
-    }
+    if (view.full) { setTimeout(work, 100); return }
     let {value, done} = formatted.next()
-    if (!done) {
-      if (value.prime) {
-        view.stats.primes++
-        view.stats.latestPrime = value.value
-      }
-      view.enqueue(value.formatted)
-      return setTimeout(work, 40)
+    if (done) return
+    if (value.prime) {
+      view.stats.primes++
+      view.stats.latestPrime = value.value
     }
+    view.enqueue(value.formatted)
+    setTimeout(work, 40)
   }
-  setTimeout(work, 0)
 
+  return {
+    start: () => setTimeout(work, 0),
+    cleanup: view.cleanup,
+  }
+}
+
+
+function main() {
+  const app = App()
+  require('signal-exit')(() => app.cleanup())
+  app.start()
 }
 
 if (require.main === module) main()
-;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 // // Generate candidates using pulsars, eliminating multiples
 // // of first bunch of primes.
@@ -318,7 +329,7 @@ if (require.main === module) main()
 
 
 
-// Didn't end up using these:
+// Didn't end up using these: {{{
 ;(() => {
   // Combines corresponding values from seqs into an iterable of arrays.
   // The length of the returned iterable will be the length
@@ -363,3 +374,4 @@ if (require.main === module) main()
     doseq(times(n, fn))
   }
 })
+// }}}
