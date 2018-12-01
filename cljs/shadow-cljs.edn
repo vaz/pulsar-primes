@@ -1,0 +1,20 @@
+;; shadow-cljs configuration
+{:source-paths
+ ["src"]
+
+ :dependencies
+ [[binaryage/devtools "0.9.10"]]
+
+ :builds
+ {:cli
+  {:id :cli
+   :target :node-script
+   :main sieve.cli/main
+   :output-to "out/cli.js"}
+  :app
+  {:target :browser
+   :output-dir "public/js"
+   :asset-path "/js"
+   :modules {:main {:entries [sieve.core]}}
+   :devtools {:http-root "public"
+              :http-port 8080}}}}
