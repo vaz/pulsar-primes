@@ -1,0 +1,18 @@
+{
+  "name": "pulsar-primes",
+  "version": "1.0.0",
+  "description": "",
+  "main": "pulsar-primes.js",
+  "scripts": {
+    "start": "node pulsar-primes.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "WTFPLv2",
+  "dependencies": {
+    "ansi-align": "^2.0.0",
+    "chalk": "^2.3.2",
+    "charm": "^1.0.2",
+    "signal-exit": "^3.0.2"
+  }
+}
