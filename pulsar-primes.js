@@ -1,6 +1,5 @@
 const id = x => x   // identity function is best function
 
-
 // Generates a repeating pattern of `p` (period) ticks, consisting of
 // a non-zero value followed by `p - 1` zeroes. Thus, the non-zero serves
 // as a periodic pulse being generated at a regular interval `p`.
