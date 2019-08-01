@@ -4,6 +4,8 @@ This is a little toy prime-generating CLI NodeJS script.
 
 Just playing with generators and writing generator-based transforms like `map`, `filter`, `take`, etc.
 
+This is a pretty cool way to look at the natural numbers in terms of their prime factors (as well as generating the primes along the way). The pattern displayed as it ticks forward kind of gives a feel for the distribution of the early primes and how they compose together to give the composite numbers.
+
 ## Pulsars?
 
 The way this works is by creating generators that *pulse* every *n* ticks, periodically. When a pulsar *pulses*, it yields its *n* value (aka its period), and for every other pulse, it yields a `null`. For example, a *3-pulsar* generates an infinite sequence: `3, null, null, 3, null, null, 3, null, null ...`.
