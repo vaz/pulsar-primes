@@ -1,10 +1,8 @@
 # pulsar-primes
 
-This is a little toy prime-generating CLI NodeJS script.
+This is a little toy prime-generating CLI NodeJS script. I wanted to try a variation of a "prime sieve" algorithm and play with generators in JS. In the process I wrote a few lazy, generator-based sequence transforms like `map`, `filter`, `take`, etc.
 
-Just playing with generators and writing generator-based transforms like `map`, `filter`, `take`, etc.
-
-This is a pretty cool way to look at the natural numbers in terms of their prime factors (as well as generating the primes along the way). The pattern displayed as it ticks forward kind of gives a feel for the distribution of the early primes and how they compose together to give the composite numbers.
+This turned out to be a pretty cool way to look at the natural numbers in terms of their prime factors (as well as generating the primes along the way). The pattern displayed as it ticks forward kind of gives a feel for the distribution of the early primes and how they compose together to give the composite numbers.
 
 ## Pulsars?
 
